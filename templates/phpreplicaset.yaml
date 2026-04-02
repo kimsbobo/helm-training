@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: bso-trianing-webapp-rs
+  name: bso-training-webapp-rs
   labels:
-    app: php
-    tier: webapp
+    app: bso-training
+    tier: frontend
 spec:
-  # modify replicas according to your case
-  replicas: 1
+  # Modify this number to scale your application
+  replicas: 3
   selector:
     matchLabels:
-      tier: webapp
+      app: bso-training
   template:
     metadata:
       labels:
-        tier: webapp
+        app: bso-training
     spec:
       containers:
       - name: bso-training-webapp
         image: ghcr.io/izual750/bso-training-webapp:latest
         ports:
-          containerPort: 9000
+        - containerPort: 9000
           protocol: TCP
