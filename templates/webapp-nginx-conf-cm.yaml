@@ -6,17 +6,34 @@ data:
   my-site.conf: |
     server {
         listen 80;
-        server_name _;
+        server_name ara-webapp.bso.cloud;
 
+        # This must match the mountPath in your pod description
+        root /usr/share/nginx/html;
+        index main.php index.php index.html;
+
+        location / {
+            # This helps the Readiness probe pass by looking for the file first
+            try_files $uri $uri/ /main.php?$query_string;
+        }
+
+        # Specific handler for the root / to match your original intent
         location = / {
             fastcgi_pass webapp-service:9000;
-            fastcgi_index main.php;
-            fastcgi_param SCRIPT_FILENAME $document_root/main.php;
+            fastcgi_param SCRIPT_FILENAME /usr/share/nginx/html/main.php;
             include fastcgi_params;
         }
 
+        location ~ \.php$ {
+            fastcgi_pass webapp-service:9000;
+            # We use the explicit path here to ensure PHP-FPM finds the file
+            fastcgi_param SCRIPT_FILENAME /usr/share/nginx/html$fastcgi_script_name;
+            include fastcgi_params;
+        }
 
-        location ~ /\.ht {
-            deny all;
+        # Allow the health check to pass if Kubernetes hits /
+        location = /healthz {
+            access_log off;
+            return 200 "healthy\n";
         }
     }
