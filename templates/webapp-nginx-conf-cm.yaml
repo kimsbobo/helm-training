@@ -4,39 +4,31 @@ metadata:
   name: webapp-nginx-config-cm
 data:
   my-site.conf: |
-    http {
-        include /etc/nginx/mime.types;
-        default_type application/octet-stream;
+    server {
+        listen 80;
+        server_name localhost;
 
-        sendfile on;
-        keepalive_timeout 65;
+        root /var/www/html;
+        index main.php;
 
-        server {
-            listen 80;
-            server_name localhost;
+        location = / {
+            fastcgi_pass 10.98.79.47:9000;
+            fastcgi_index main.php;
+            fastcgi_param SCRIPT_FILENAME $document_root/main.php;
+            include fastcgi_params;
+        }
 
-            root /var/www/html;
-            index main.php;
+        location ~ \.php$ {
+            fastcgi_pass 10.98.79.47:9000;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+        }
 
-            location = / {
-                fastcgi_pass 10.98.79.47:9000;
-                fastcgi_index main.php;
-                fastcgi_param SCRIPT_FILENAME $document_root/main.php;
-                include fastcgi_params;
-            }
+        location ~ \.(css|js)$ {
+            try_files $uri =404;
+        }
 
-            location ~ \.php$ {
-                fastcgi_pass 10.98.79.47:9000;
-                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                include fastcgi_params;
-            }
-
-            location ~ \.(css|js)$ {
-                try_files $uri =404;
-            }
-
-            location ~ /\.ht {
-                deny all;
-            }
+        location ~ /\.ht {
+            deny all;
         }
     }
