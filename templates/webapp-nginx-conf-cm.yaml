@@ -5,16 +5,15 @@ metadata:
 data:
   my-site.conf: |
     server {
-        listen 80;
+      listen 80;
 
-        location / {
-            proxy_pass http://webapp-service.simple-webapp.svc.cluster.local:9000;
+      location / {
+          proxy_pass http://webapp-service:9000;
 
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-            proxy_connect_timeout 5s;
-            proxy_read_timeout 10s;
-        }
-    }
+          proxy_connect_timeout 5s;
+          proxy_read_timeout 10s;
+      }
