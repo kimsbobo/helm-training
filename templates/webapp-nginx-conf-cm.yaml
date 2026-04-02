@@ -6,14 +6,7 @@ data:
   my-site.conf: |
     server {
         listen 80;
-
-        # root /var/www/html;
-        index main.php;
-
-        location / {
-            try_files $uri $uri/ /main.php?$query_string;
-        }
-
+        
         location ~ \.php$ {
             fastcgi_pass webapp-service:9000;
             fastcgi_index main.php;
