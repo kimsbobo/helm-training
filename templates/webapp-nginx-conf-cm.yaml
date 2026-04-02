@@ -9,7 +9,7 @@ data:
         server_name ara-webapp.bso.cloud;
 
         # This must match the mountPath in your pod description
-        root /usr/share/nginx/html;
+        # root /usr/share/nginx/html;
         index main.php index.php index.html;
 
         location / {
@@ -19,13 +19,13 @@ data:
 
         # Specific handler for the root / to match your original intent
         location = / {
-            fastcgi_pass 10.64.36.136:9000;
+            fastcgi_pass webapp-service:9000;
             fastcgi_param SCRIPT_FILENAME /usr/share/nginx/html/main.php;
             include fastcgi_params;
         }
 
         location ~ \.php$ {
-            fastcgi_pass 10.64.36.136:9000;
+            fastcgi_pass webapp-service:9000;
             # We use the explicit path here to ensure PHP-FPM finds the file
             fastcgi_param SCRIPT_FILENAME /usr/share/nginx/html$fastcgi_script_name;
             include fastcgi_params;
