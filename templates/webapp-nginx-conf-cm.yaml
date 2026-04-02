@@ -8,7 +8,7 @@ data:
         listen 80;
 
         root /var/www/html;
-        index main.php index.php index.html;
+        index main.php;
 
         location / {
             try_files $uri $uri/ /main.php?$query_string;
