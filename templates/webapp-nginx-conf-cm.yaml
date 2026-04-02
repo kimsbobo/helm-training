@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-nginx-config-cm
+data:
+  my-site.conf: |
+    server {
+        listen 80;
+        server_name ara-webapp.bso.cloud;
+        location / {
+            root /usr/share/nginx/html;
+            index simplewebapp.html;
+        }
+    }
