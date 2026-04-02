@@ -4,23 +4,43 @@ metadata:
   name: webapp-nginx-config-cm
 data:
   my-site.conf: |
-    server {
-        listen 80;
-        server_name ara-webapp.bso.cloud; # Replace with your domain or IP
+    events {
+        worker_connections 1024;
+    }
 
-        location / {
-            # The internal address of your new service
-            proxy_pass http://127.0.0.1:3000; 
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
 
-            # Standard headers to ensure the backend knows the real client info
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+        sendfile on;
+        keepalive_timeout 65;
 
-            # Optional: Handle WebSockets if your service needs them
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
+        server {
+            listen 80;
+            server_name localhost;
+
+            root /var/www/html;
+            index main.php;
+
+            location = / {
+                fastcgi_pass webapp:9000;
+                fastcgi_index main.php;
+                fastcgi_param SCRIPT_FILENAME $document_root/main.php;
+                include fastcgi_params;
+            }
+
+            location ~ \.php$ {
+                fastcgi_pass webapp:9000;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                include fastcgi_params;
+            }
+
+            location ~ \.(css|js)$ {
+                try_files $uri =404;
+            }
+
+            location ~ /\.ht {
+                deny all;
+            }
         }
     }
