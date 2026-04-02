@@ -40,4 +40,8 @@ spec:
                   number: {{ $.Values.service.port }}
           {{- end }}
     {{- end }}
+status:
+  loadBalancer:
+    ingress:
+      - ip: 89.30.39.130
 {{- end }}
