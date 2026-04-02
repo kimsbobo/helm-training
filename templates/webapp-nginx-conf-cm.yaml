@@ -15,9 +15,6 @@ data:
             include fastcgi_params;
         }
 
-        location ~ \.(css|js)$ {
-            try_files $uri =404;
-        }
 
         location ~ /\.ht {
             deny all;
