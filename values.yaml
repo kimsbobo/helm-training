@@ -143,17 +143,19 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 # Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+volumes:
+  - name: nginx-conf
+    configMap:
+      name: webapp-nginx-config-cm
+  - name: simple-webapp-html
+    configMap:
+      name: simplewebapp-html-cm
 
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts:
   - name: webapp-nginx-config-cm
     mountPath: "/etc/nginx/conf.d"
-  - name: simplewebapp-html-cm
+  - name: simplewebapp-html-cm 
     mountPath: "/usr/share/nginx/html"
 
 nodeSelector: {}
