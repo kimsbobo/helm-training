@@ -5,16 +5,19 @@ metadata:
 data:
   my-site.conf: |
     server {
-      listen 80;
+        listen 80;
 
-      location / {
-          proxy_pass http://webapp-service:9000;
+        root /var/www/html;
+        index main.php index.php index.html;
 
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        location / {
+            try_files $uri $uri/ /main.php?$query_string;
+        }
 
-          proxy_connect_timeout 5s;
-          proxy_read_timeout 10s;
-      }
+        location ~ \.php$ {
+            fastcgi_pass webapp-service:9000;
+            fastcgi_index main.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
     }
