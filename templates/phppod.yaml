@@ -7,4 +7,4 @@ spec:
   - name: bso-training-webapp
     image: ghcr.io/izual750/bso-training-webapp:latest
     ports:
-    - containerPort: 80
+    - containerPort: 9000
