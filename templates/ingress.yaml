@@ -43,5 +43,5 @@ spec:
 status:
   loadBalancer:
     ingress:
-      - ip: 89.30.39.130
+      - ip: {{ .Values.ingress.ingressIP }}
 {{- end }}

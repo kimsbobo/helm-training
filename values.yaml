@@ -72,6 +72,7 @@ ingress:
    - secretName: simple-webapp-tls
      hosts:
        - ara-webapp.bso.cloud
+  ingressIP: 89.30.39.130
 
 # -- Expose the service via gateway-api HTTPRoute
 # Requires Gateway API resources and suitable controller installed within the cluster
