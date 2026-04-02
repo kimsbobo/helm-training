@@ -8,9 +8,6 @@ data:
         listen 80;
         server_name ara-webapp.bso.cloud;
 
-        root /var/www/html;
-        index main.php;
-
         location = / {
             fastcgi_pass 10.98.79.47:9000;
             fastcgi_index main.php;
