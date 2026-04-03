@@ -27,59 +27,74 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       serviceAccountName: {{ include "simple-webapp.serviceAccountName" . }}
+
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       containers:
-        - name: phpwebapp
-          image: ghcr.io/izual750/bso-training-webapp:1.2
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- range .Values.containers }}
+        - name: {{ .name }}
+          image: {{ .image }}
+          imagePullPolicy: {{ .imagePullPolicy | default "IfNotPresent" }}
+
+          {{- if .ports }}
           ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-        - name: {{ .Chart.Name }}
-          {{- with .Values.securityContext }}
+            {{- toYaml .ports | nindent 12 }}
+          {{- end }}
+
+          {{- if .securityContext }}
           securityContext:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml .securityContext | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          {{- with .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
+
+          {{- if .env }}
+          env:
+            {{- toYaml .env | nindent 12 }}
           {{- end }}
-          {{- with .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.resources }}
+
+          {{- if .resources }}
           resources:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml .resources | nindent 12 }}
           {{- end }}
-          {{- with .Values.volumeMounts }}
+
+          {{- if .volumeMounts }}
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml .volumeMounts | nindent 12 }}
           {{- end }}
-      {{- with .Values.volumes }}
+
+          {{- if .livenessProbe }}
+          livenessProbe:
+            {{- toYaml .livenessProbe | nindent 12 }}
+          {{- end }}
+
+          {{- if .readinessProbe }}
+          readinessProbe:
+            {{- toYaml .readinessProbe | nindent 12 }}
+          {{- end }}
+
+        {{- end }}
+
+      {{- if .Values.volumes }}
       volumes:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.volumes | nindent 8 }}
       {{- end }}
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+

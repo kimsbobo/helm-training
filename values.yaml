@@ -1,65 +1,62 @@
-# Default values for simple-webapp.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Default values for simple-webapp
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
-replicaCount: 1
+replicaCount: 2
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
-image:
-  repository: nginx
-  # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
-# This is to override the chart name.
 nameOverride: ""
 fullnameOverride: ""
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+imagePullSecrets: []
+
 serviceAccount:
-  # Specifies whether a service account should be created
   create: false
-  # Automatically mount a ServiceAccount's API credentials?
   automount: true
-  # Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 podLabels: {}
 
 podSecurityContext: {}
-  # fsGroup: 2000
-
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# ✅ MULTI-CONTAINER DEFINITION
+containers:
+  - name: nginx
+    image: nginx:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+      - name: http
+        containerPort: 80
+    volumeMounts:
+      - name: nginx-config-vm
+        mountPath: /etc/nginx/conf.d
+      - name: simpleweb-app-html-vm
+        mountPath: /usr/share/nginx/html
+    livenessProbe:
+      httpGet:
+        path: /
+        port: http
+    readinessProbe:
+      httpGet:
+        path: /
+        port: http
+
+  - name: webapp-php
+    image: ghcr.io/izual750/bso-training-webapp:1.2
+    imagePullPolicy: IfNotPresent
+    ports:
+      - name: webapp-port
+        containerPort: 8080
+
+# Service config (points to nginx)
 service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
 
-# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+# ✅ FIXED INGRESS
 ingress:
-  enabled: enable
-  className: "nginx"
+  enabled: true
+  className: nginx
   annotations:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     cert-manager.io/cluster-issuer: letsencrypt-production
@@ -69,80 +66,37 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-   - secretName: simple-webapp-tls
-     hosts:
-       - ara-webapp.bso.cloud
+    - secretName: simple-webapp-tls
+      hosts:
+        - ara-webapp.bso.cloud
   ingressIP: 89.30.39.130
 
-# -- Expose the service via gateway-api HTTPRoute
-# Requires Gateway API resources and suitable controller installed within the cluster
-# (see: https://gateway-api.sigs.k8s.io/guides/)
+# Optional HTTPRoute (unchanged)
 httpRoute:
-  # HTTPRoute enabled.
   enabled: false
-  # HTTPRoute annotations.
   annotations: {}
-  # Which Gateways this Route is attached to.
   parentRefs:
-  - name: gateway
-    sectionName: http
-    # namespace: default
-  # Hostnames matching HTTP header.
+    - name: gateway
+      sectionName: http
   hostnames:
-  - chart-example.local
-  # List of rules and filters applied.
+    - chart-example.local
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /headers
-  #   filters:
-  #   - type: RequestHeaderModifier
-  #     requestHeaderModifier:
-  #       set:
-  #       - name: My-Overwrite-Header
-  #         value: this-is-the-only-value
-  #       remove:
-  #       - User-Agent
-  # - matches:
-  #   - path:
-  #       type: PathPrefix
-  #       value: /echo
-  #     headers:
-  #     - name: version
-  #       value: v2
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /headers
 
+# Resources (optional)
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+# Autoscaling
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
 
-# Additional volumes on the output Deployment definition.
+# ✅ VOLUMES (shared across containers)
 volumes:
   - name: nginx-config-vm
     configMap:
@@ -151,15 +105,6 @@ volumes:
     configMap:
       name: simplewebapp-html-cm
 
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts:
-  - name: nginx-config-vm
-    mountPath: "/etc/nginx/conf.d"
-  - name: simpleweb-app-html-vm 
-    mountPath: "/usr/share/nginx/html"
-
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
