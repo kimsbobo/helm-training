@@ -19,7 +19,7 @@ spec:
             - name: REDIS_HOST
               value: "redis-sentinel"
             - name: REDIS_PORT
-              value: 6379
+              value: "6379"
             - name: REDIS_PASSWORD
               value: "simplewebapp"
           ports:
