@@ -15,5 +15,12 @@ spec:
       containers:
         - name: webapp
           image: ghcr.io/izual750/bso-training-webapp:1.2.2
+          env:
+          - name: REDIS_HOST
+            value: "redis-sentinel"
+          - name: REDIS_PORT
+            value: 6379
+          - name: REDIS_PASSWORD
+            value: "simplewebapp"
           ports:
             - containerPort: 8080
