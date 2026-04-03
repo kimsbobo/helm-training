@@ -8,18 +8,18 @@ data:
         listen 80;
         server_name _;
 
-        root /var/www/html;
+        # root /var/www/html;
         index main.php;
 
         location = / {
-            fastcgi_pass webapp-service:9000;
+            fastcgi_pass webapp:9000;
             fastcgi_index main.php;
             fastcgi_param SCRIPT_FILENAME $document_root/main.php;
             include fastcgi_params;
         }
 
         location ~ \.php$ {
-            fastcgi_pass webapp-service:9000;
+            fastcgi_pass webapp:9000;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
             include fastcgi_params;
         }
