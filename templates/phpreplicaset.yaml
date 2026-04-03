@@ -6,7 +6,6 @@ metadata:
     app: bso-training
     tier: frontend
 spec:
-  # Modify this number to scale your application
   replicas: 1
   selector:
     matchLabels:
@@ -17,16 +16,15 @@ spec:
         app: bso-training
     spec:
       containers:
-      - name: bso-training-webapp
-        image: ghcr.io/izual750/bso-training-webapp:1.2
-        env:
-          - name: REDIS_HOST
-            value: "redis"
-          - name: REDIS_PORT
-            value: 6379
-          - name: REDIS_PASSWORD
-            value: simplewebapp
-
-        ports:
-        - containerPort: 8080
-          protocol: TCP
+        - name: bso-training-webapp
+          image: ghcr.io/izual750/bso-training-webapp:1.2
+          env:
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: 6379
+            - name: REDIS_PASSWORD
+              value: simplewebapp
+          ports:
+            - containerPort: 8080
+              protocol: TCP
